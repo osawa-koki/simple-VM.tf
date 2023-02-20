@@ -105,31 +105,26 @@ resource "azurerm_network_interface" "example" {
 }
 
 resource "azurerm_linux_virtual_machine" "example" {
-  name                            = var.project_name
-  resource_group_name             = azurerm_resource_group.example.name
-  location                        = azurerm_resource_group.example.location
-  size                            = "Standard_B1ls"
-  admin_username                  = "adminuser"
-  network_interface_ids           = [azurerm_network_interface.example.id]
-  disable_password_authentication = true
-  os_profile {
-    computer_name  = var.project_name
-    admin_username = "adminuser"
-    linux_configuration {
-      disable_password_authentication = true
-      ssh_keys {
-        path     = "/home/adminuser/.ssh/authorized_keys"
-        key_data = file(var.ssh_public_key_path)
-      }
-    }
+  name                = "example-machine"
+  resource_group_name = azurerm_resource_group.example.name
+  location            = azurerm_resource_group.example.location
+  size                = "Standard_F2"
+  admin_username      = "adminuser"
+  network_interface_ids = [
+    azurerm_network_interface.example.id,
+  ]
+
+  admin_ssh_key {
+    username   = "adminuser"
+    public_key = file(var.ssh_public_key_path)
   }
+
   os_disk {
-    name              = var.project_name
-    caching           = "ReadWrite"
-    create_option     = "FromImage"
-    managed_disk_type = "Standard_LRS"
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
   }
-  storage_image_reference {
+
+  source_image_reference {
     publisher = "Canonical"
     offer     = "UbuntuServer"
     sku       = "20.04-LTS"
