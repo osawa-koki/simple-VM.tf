@@ -1,4 +1,3 @@
-
 variable "project_name" {
   type        = string
   default     = "simple-vm-instance"
@@ -113,17 +112,27 @@ resource "azurerm_linux_virtual_machine" "example" {
   admin_username                  = "adminuser"
   network_interface_ids           = [azurerm_network_interface.example.id]
   disable_password_authentication = true
-  ssh_key {
-    key_data = file(var.ssh_public_key_path)
+  os_profile {
+    computer_name  = var.project_name
+    admin_username = "adminuser"
+    linux_configuration {
+      disable_password_authentication = true
+      ssh_keys {
+        path     = "/home/adminuser/.ssh/authorized_keys"
+        key_data = file(var.ssh_public_key_path)
+      }
+    }
   }
   os_disk {
-    caching              = "ReadWrite"
-    storage_account_type = "Standard_LRS"
+    name              = var.project_name
+    caching           = "ReadWrite"
+    create_option     = "FromImage"
+    managed_disk_type = "Standard_LRS"
   }
-  source_image_reference {
+  storage_image_reference {
     publisher = "Canonical"
     offer     = "UbuntuServer"
-    sku       = "22.04-LTS"
+    sku       = "20.04-LTS"
     version   = "latest"
   }
 }
