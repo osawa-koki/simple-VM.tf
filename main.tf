@@ -132,3 +132,8 @@ resource "azurerm_linux_virtual_machine" "example" {
     version   = "latest"
   }
 }
+
+// IPアドレスを出力
+output "public_ip_address" {
+  value = azurerm_public_ip.example.ip_address
+}
